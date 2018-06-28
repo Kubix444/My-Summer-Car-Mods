@@ -1,0 +1,451 @@
+using MSCLoader; using UnityEngine; using HutongGames.PlayMaker;
+
+namespace Ferndale_Lowrider_Edition
+{
+    public class Ferndale_Lowrider_Edition : Mod
+    {
+        public override string ID => "Ferndale Lowrider Edition";
+        public override string Name => "Ferndale Lowrider Edition";
+        public override string Author => "Kubix";
+        public override string Version => "0.7";
+
+        //Set this to true if you will be load custom assets from Assets folder.
+        //This will create subfolder in Assets folder for your mod.
+        public override bool UseAssetsFolder => true;
+
+
+        //Transforms
+        Transform wheelFL;
+        Transform wheelFR;
+        Transform wheelRL;
+        Transform wheelRR;
+        Transform wheelRLinner;
+        Transform wheelRRinner;
+        Transform wheelFLouter;
+        Transform wheelFRouter;
+        Transform wheelRLouter;
+        Transform wheelRRouter;
+
+
+        //Bools
+        bool isFLactive = false;
+        bool isFRactive = false;
+        bool isRLactive = false;
+        bool isRRactive = false;
+
+
+        //GameObjects
+        private GameObject ferndale;
+        private GameObject paintjob;
+        private GameObject bootlidpaintjob;
+        private GameObject DoorL;
+        private GameObject DoorR;
+        private GameObject ferndaledoorR;
+        private GameObject ferndaledoorL;
+        private GameObject InnerFL;
+        private GameObject InnerFR;
+        private GameObject InnerRL;
+        private GameObject InnerRR;
+        private GameObject OuterFL;
+        private GameObject OuterFR;
+        private GameObject OuterRL;
+        private GameObject OuterRR;
+        private GameObject TireFL;
+        private GameObject TireFR;
+        private GameObject TireRL;
+        private GameObject TireRR;
+        private GameObject MuscleChassis;
+        private GameObject MuscleChassis1;
+        private GameObject windowsOut;
+        private GameObject windowsIn;
+        private GameObject ConvertibleInterior;
+
+        //Keybinds
+        private Keybind FLsusButton = new Keybind("FlsusButton", "FLsuspension", KeyCode.Keypad7);
+        private Keybind FRsusButton = new Keybind("FRsusButton", "FRsuspension", KeyCode.Keypad9);
+        private Keybind RLsusButton = new Keybind("RLsusButton", "RLsuspension", KeyCode.Keypad1);
+        private Keybind RRsusButton = new Keybind("RRsusButton", "RRsuspension", KeyCode.Keypad3);
+        private Keybind increase = new Keybind("increase", "Increase ride height", KeyCode.PageUp);
+        private Keybind decrease = new Keybind("decrease", "Decrease ride height", KeyCode.PageDown);
+
+
+        int stopLoad = 0;
+
+
+        public override void Update()
+        {
+            if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
+            {
+
+                stopLoad++;
+
+                if (stopLoad == 1)
+                {
+
+                    if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
+                    {
+
+                        //Loads custom steering wheel
+                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_custom").SetActive(true);
+                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_Stock").SetActive(false);
+
+                        //Disables hood scoop
+                        GameObject.Find("muscle_Scoop").SetActive(false);
+
+                        //Asset replacement for LOD
+                        //---------------------------------------------------------------------------------------------------
+
+                        AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
+
+                        //Replaces chassis
+                        GameObject musclechassis = ab.LoadAsset("muscle chassis.obj") as GameObject;
+                        musclechassis = GameObject.Instantiate(musclechassis);
+                        MuscleChassis.GetComponent<MeshFilter>().sharedMesh = musclechassis.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Loads texture for chassis
+                        Texture chassistexture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+                        MuscleChassis.GetComponent<MeshRenderer>().material.mainTexture = chassistexture;
+
+                        //Replaces chassis 1
+                        GameObject musclechassis1 = ab.LoadAsset("muscle chassis base.obj") as GameObject;
+                        musclechassis1 = GameObject.Instantiate(musclechassis1);
+                        MuscleChassis1.GetComponent<MeshFilter>().sharedMesh = musclechassis1.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Loads texture for chassis 1
+                        Texture chassis1texture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+                        MuscleChassis1.GetComponent<MeshRenderer>().material.mainTexture = chassis1texture;
+
+                        //Replaces windows(out)
+                        GameObject windowsout = ab.LoadAsset("muscle windows out.obj") as GameObject;
+                        windowsout = GameObject.Instantiate(windowsout);
+                        windowsOut.GetComponent<MeshFilter>().sharedMesh = windowsout.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Replaces windows(in)
+                        GameObject windowsin = ab.LoadAsset("muscle windows in.obj") as GameObject;
+                        windowsin = GameObject.Instantiate(windowsin);
+                        windowsIn.GetComponent<MeshFilter>().sharedMesh = windowsin.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Replaces interior
+                        GameObject convertibleinterior = ab.LoadAsset("muscle interior convertible.obj") as GameObject;
+                        convertibleinterior = GameObject.Instantiate(convertibleinterior);
+                        ConvertibleInterior.GetComponent<MeshFilter>().sharedMesh = convertibleinterior.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        ab.Unload(false);
+                    }
+                }
+            }
+
+            if (FsmVariables.GlobalVariables.FindFsmString("PlayerCurrentVehicle").Value != "FERNDALE(1630kg)")
+            {
+                if (RLsusButton.IsDown())
+                {
+                    isRLactive = !isRLactive;
+                }
+
+                if (RRsusButton.IsDown())
+                {
+                    isRRactive = !isRRactive;
+                }
+
+                if (FRsusButton.IsDown())
+                {
+                    isFRactive = !isFRactive;
+                }
+
+                if (FLsusButton.IsDown())
+                {
+                    isFLactive = !isFLactive;
+                }
+
+                if (isRRactive == true)
+                {
+                    if (increase.IsDown())
+                    {
+                        Vector3 pos = wheelRR.localPosition;
+                        pos.y -= 0.1f;
+                        wheelRR.localPosition = pos;
+                    }
+                    if (decrease.IsPressed())
+                    {
+                        Vector3 pos = wheelRR.localPosition;
+                        pos.y += 0.005f;
+                        wheelRR.localPosition = pos;
+                    }
+                }
+                if (isRLactive == true)
+                {
+                    if (increase.IsDown())
+                    {
+                        Vector3 pos = wheelRL.localPosition;
+                        pos.y -= 0.1f;
+                        wheelRL.localPosition = pos;
+                    }
+                    if (decrease.IsPressed())
+                    {
+                        Vector3 pos = wheelRL.localPosition;
+                        pos.y += 0.005f;
+                        wheelRL.localPosition = pos;
+                    }
+                }
+                if (isFRactive == true)
+                {
+                    if (increase.IsDown())
+                    {
+                        Vector3 pos = wheelFR.localPosition;
+                        pos.y -= 0.25f;
+                        wheelFR.localPosition = pos;
+                    }
+                    if (decrease.IsPressed())
+                    {
+                        Vector3 pos = wheelFR.localPosition;
+                        pos.y += 0.005f;
+                        wheelFR.localPosition = pos;
+                    }
+                }
+                if (isFLactive == true)
+                {
+                    if (increase.IsDown())
+                    {
+                        Vector3 pos = wheelFL.localPosition;
+                        pos.y -= 0.25f;
+                        wheelFL.localPosition = pos;
+                    }
+                    if (decrease.IsPressed())
+                    {
+                        Vector3 pos = wheelFL.localPosition;
+                        pos.y += 0.005f;
+                        wheelFL.localPosition = pos;
+                    }
+                }
+            }
+        }
+
+        public override void OnLoad()
+        {
+
+            //Keybindings
+            Keybind.Add(this, FLsusButton);
+            Keybind.Add(this, FRsusButton);
+            Keybind.Add(this, RLsusButton);
+            Keybind.Add(this, RRsusButton);
+            Keybind.Add(this, increase);
+            Keybind.Add(this, decrease);
+
+
+            AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
+
+
+            //transforms
+            wheelFL = GameObject.Find("FERNDALE(1630kg)/wheelFL").transform;
+            wheelFR = GameObject.Find("FERNDALE(1630kg)/wheelFR").transform;
+            wheelRL = GameObject.Find("FERNDALE(1630kg)/wheelRL").transform;
+            wheelRR = GameObject.Find("FERNDALE(1630kg)/wheelRR").transform;
+            wheelRLinner = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/Outer/Inner 1").transform;
+            wheelRRinner = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/Outer/Inner").transform;
+            wheelFLouter = GameObject.Find("FERNDALE(1630kg)/wheelFL/Tire/Mesh 3/Outer").transform;
+            wheelFRouter = GameObject.Find("FERNDALE(1630kg)/wheelFR/Tire/Mesh 2/Outer").transform;
+            wheelRLouter = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/Outer").transform;
+            wheelRRouter = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/Outer").transform;
+
+
+            //Finds all needed GameObjects
+            ferndale = GameObject.Find("FERNDALE(1630kg)/MESH/muscle_body");
+            paintjob = GameObject.Find("FERNDALE(1630kg)/MESH/muscle_body");
+            bootlidpaintjob = GameObject.Find("muscle_bootlid");
+            DoorL = GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(leftx)/door");
+            DoorR = GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1");
+            ferndaledoorR = GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1");
+            ferndaledoorL = GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(leftx)/door");
+            InnerFL = GameObject.Find("FERNDALE(1630kg)/wheelFL/Tire/Mesh 3/Outer/Inner 2");
+            InnerFR = GameObject.Find("FERNDALE(1630kg)/wheelFR/Tire/Mesh 2/Outer/Inner 1");
+            InnerRL = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/Outer/Inner 1");
+            InnerRR = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/Outer/Inner");
+            OuterFL = GameObject.Find("FERNDALE(1630kg)/wheelFL/Tire/Mesh 3/Outer");
+            OuterFR = GameObject.Find("FERNDALE(1630kg)/wheelFR/Tire/Mesh 2/Outer");
+            OuterRL = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/Outer");
+            OuterRR = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/Outer");
+            TireFL = GameObject.Find("FERNDALE(1630kg)/wheelFL/Tire/Mesh 3/tire_stock");
+            TireFR = GameObject.Find("FERNDALE(1630kg)/wheelFR/Tire/Mesh 2/tire_stock");
+            TireRL = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/tire_stock");
+            TireRR = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/tire_stock");
+            MuscleChassis = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis");
+            MuscleChassis1 = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis 1");
+            windowsOut = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows");
+            windowsIn = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows_in");
+            ConvertibleInterior = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_interior");
+
+
+            //Changes transform of wheels and thier childs
+            wheelFL.localScale = new Vector3(0.8f, 0.88f, 0.88f);
+            wheelFR.localScale = new Vector3(0.8f, 0.88f, 0.88f);
+            wheelRL.localScale = new Vector3(0.55f, 0.9f, 0.9f);
+            wheelRR.localScale = new Vector3(0.55f, 0.9f, 0.9f);
+            wheelFLouter.localScale = new Vector3(1.3f, 1.3f, 1.35f);
+            wheelFRouter.localScale = new Vector3(1.3f, 1.3f, 1.35f);
+            wheelRLouter.localScale = new Vector3(1.3f, 1.3f, 1.39f);
+            wheelRRouter.localScale = new Vector3(1.3f, 1.3f, 1.39f);
+            wheelFLouter.localPosition = new Vector3(0.0065f, 0f, 0f);
+            wheelFRouter.localPosition = new Vector3(0.0065f, 0f, 0f);
+            wheelRLouter.localPosition = new Vector3(0.003f, 0f, 0f);
+            wheelRRouter.localPosition = new Vector3(0.003f, 0f, 0f);
+            wheelFL.localPosition = new Vector3(-0.83f, 0.199f, 1.492f);
+            wheelFR.localPosition = new Vector3(0.83f, 0.199f, 1.492f);
+            wheelRLinner.localPosition = new Vector3(0f, 0f, 0.05f);
+            wheelRRinner.localPosition = new Vector3(0f, 0f, 0.05f);
+
+
+            //Disables door's side windows
+            GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(leftx)/door/glass").SetActive(false);
+            GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(leftx)/door/glass_in").SetActive(false);
+            GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1/glass").SetActive(false);
+            GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1/glass_in").SetActive(false);
+
+
+            //Asset replacement
+            //---------------------------------------------------------------------------------------------------
+
+            //Replaces ferndale's body
+            
+            GameObject convertiblemesh = ab.LoadAsset("muscle body convertible.obj") as GameObject;
+            convertiblemesh = GameObject.Instantiate(convertiblemesh);
+            ferndale.GetComponent<MeshFilter>().sharedMesh = convertiblemesh.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads paintjob
+            Texture lowriderpaintjob = ab.LoadAsset("muscle_paint_lowrider.png") as Texture;
+            paintjob.GetComponent<MeshRenderer>().material.mainTexture = lowriderpaintjob;
+
+            //Loads paint to bootlid
+            Texture bootlidpaint = ab.LoadAsset("muscle_paint_lowrider.png") as Texture;
+            bootlidpaintjob.GetComponent<MeshRenderer>().material.mainTexture = bootlidpaint;
+
+            //Loads paint to left doors
+            Texture leftdoorpaint = ab.LoadAsset("muscle_paint_lowrider.png") as Texture;
+            DoorL.GetComponent<MeshRenderer>().material.mainTexture = leftdoorpaint;
+
+            //Loads paint to right doors
+            Texture rightdoorpaint = ab.LoadAsset("muscle_paint_lowrider.png") as Texture;
+            DoorR.GetComponent<MeshRenderer>().material.mainTexture = rightdoorpaint;
+
+            //Replaces right doors
+            GameObject convertibledoorR = ab.LoadAsset("cabrio door right.obj") as GameObject;
+            convertibledoorR = GameObject.Instantiate(convertibledoorR);
+            ferndaledoorR.GetComponent<MeshFilter>().sharedMesh = convertibledoorR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Replaces left doors
+            GameObject convertibledoorL = ab.LoadAsset("cabrio door left.obj") as GameObject;
+            convertibledoorL = GameObject.Instantiate(convertibledoorL);
+            ferndaledoorL.GetComponent<MeshFilter>().sharedMesh = convertibledoorL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads inner FL
+            GameObject innerFL = ab.LoadAsset("Lowrider rim inner.obj") as GameObject;
+            innerFL = GameObject.Instantiate(innerFL);
+            InnerFL.GetComponent<MeshFilter>().sharedMesh = innerFL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads inner FL paint
+            Texture innerFLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            InnerFL.GetComponent<MeshRenderer>().material.mainTexture = innerFLpaint;
+
+            //Loads inner FR
+            GameObject innerFR = ab.LoadAsset("Lowrider rim inner.obj") as GameObject;
+            innerFR = GameObject.Instantiate(innerFR);
+            InnerFR.GetComponent<MeshFilter>().sharedMesh = innerFR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads inner FR paint
+            Texture innerFRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            InnerFR.GetComponent<MeshRenderer>().material.mainTexture = innerFRpaint;
+
+            //Loads inner RL
+            GameObject innerRL = ab.LoadAsset("Lowrider rim inner.obj") as GameObject;
+            innerRL = GameObject.Instantiate(innerRL);
+            InnerRL.GetComponent<MeshFilter>().sharedMesh = innerRL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads inner RL paint
+            Texture innerRLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            InnerRL.GetComponent<MeshRenderer>().material.mainTexture = innerRLpaint;
+
+            //Loads inner RR
+            GameObject innerRR = ab.LoadAsset("Lowrider rim inner.obj") as GameObject;
+            innerRR = GameObject.Instantiate(innerRR);
+            InnerRR.GetComponent<MeshFilter>().sharedMesh = innerRR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads inner RR paint
+            Texture innerRRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            InnerRR.GetComponent<MeshRenderer>().material.mainTexture = innerRRpaint;
+
+            //Loads outer FL
+            GameObject outerFL = ab.LoadAsset("Lowrider rim outer.obj") as GameObject;
+            outerFL = GameObject.Instantiate(outerFL);
+            OuterFL.GetComponent<MeshFilter>().sharedMesh = outerFL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads outer FL paint
+            Texture outerFLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            OuterFL.GetComponent<MeshRenderer>().material.mainTexture = outerFLpaint;
+
+            //Loads outer FR
+            GameObject outerFR = ab.LoadAsset("Lowrider rim outer.obj") as GameObject;
+            outerFR = GameObject.Instantiate(outerFR);
+            OuterFR.GetComponent<MeshFilter>().sharedMesh = outerFR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads outer FR paint
+            Texture outerFRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            OuterFR.GetComponent<MeshRenderer>().material.mainTexture = outerFRpaint;
+
+            //Loads outer RL
+            GameObject outerRL = ab.LoadAsset("Lowrider rim outer.obj") as GameObject;
+            outerRL = GameObject.Instantiate(outerRL);
+            OuterRL.GetComponent<MeshFilter>().sharedMesh = outerRL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads outer RL paint
+            Texture outerRLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            OuterRL.GetComponent<MeshRenderer>().material.mainTexture = outerRLpaint;
+
+            //Loads outer RR
+            GameObject outerRR = ab.LoadAsset("Lowrider rim outer.obj") as GameObject;
+            outerRR = GameObject.Instantiate(outerRR);
+            OuterRR.GetComponent<MeshFilter>().sharedMesh = outerRR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads outer RR paint
+            Texture outerRRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            OuterRR.GetComponent<MeshRenderer>().material.mainTexture = outerRRpaint;
+
+            //Loads tire FL
+            GameObject tireFL = ab.LoadAsset("Lowrider Tire.obj") as GameObject;
+            tireFL = GameObject.Instantiate(tireFL);
+            TireFL.GetComponent<MeshFilter>().sharedMesh = tireFL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads tire FL paint
+            Texture tireFLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            TireFL.GetComponent<MeshRenderer>().material.mainTexture = tireFLpaint;
+
+            //Loads tire FR
+            GameObject tireFR = ab.LoadAsset("Lowrider Tire.obj") as GameObject;
+            tireFR = GameObject.Instantiate(tireFR);
+            TireFR.GetComponent<MeshFilter>().sharedMesh = tireFR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads tire FR paint
+            Texture tireFRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            TireFR.GetComponent<MeshRenderer>().material.mainTexture = tireFRpaint;
+
+            //Loads tire RL
+            GameObject tireRL = ab.LoadAsset("Lowrider Tire.obj") as GameObject;
+            tireRL = GameObject.Instantiate(tireRL);
+            TireRL.GetComponent<MeshFilter>().sharedMesh = tireRL.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads tire RL paint
+            Texture tireRLpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            TireRL.GetComponent<MeshRenderer>().material.mainTexture = tireRLpaint;
+
+            //Loads tire RR
+            GameObject tireRR = ab.LoadAsset("Lowrider Tire.obj") as GameObject;
+            tireRR = GameObject.Instantiate(tireRR);
+            TireRR.GetComponent<MeshFilter>().sharedMesh = tireRR.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+            //Loads tire RR paint
+            Texture tireRRpaint = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+            TireRR.GetComponent<MeshRenderer>().material.mainTexture = tireRRpaint;
+
+            ab.Unload(false);
+
+        }
+    }
+}
