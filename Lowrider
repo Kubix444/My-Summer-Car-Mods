@@ -7,7 +7,7 @@ namespace Ferndale_Lowrider_Edition
         public override string ID => "Ferndale Lowrider Edition";
         public override string Name => "Ferndale Lowrider Edition";
         public override string Author => "Kubix";
-        public override string Version => "0.7";
+        public override string Version => "0.7a";
 
         //Set this to true if you will be load custom assets from Assets folder.
         //This will create subfolder in Assets folder for your mod.
@@ -69,159 +69,10 @@ namespace Ferndale_Lowrider_Edition
         private Keybind decrease = new Keybind("decrease", "Decrease ride height", KeyCode.PageDown);
 
 
-        int stopLoad = 0;
-
-
-        public override void Update()
-        {
-            if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
-            {
-
-                stopLoad++;
-
-                if (stopLoad == 1)
-                {
-
-                    if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
-                    {
-
-                        //Loads custom steering wheel
-                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_custom").SetActive(true);
-                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_Stock").SetActive(false);
-
-                        //Disables hood scoop
-                        GameObject.Find("muscle_Scoop").SetActive(false);
-
-                        //Asset replacement for LOD
-                        //---------------------------------------------------------------------------------------------------
-
-                        AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
-
-                        //Replaces chassis
-                        GameObject musclechassis = ab.LoadAsset("muscle chassis.obj") as GameObject;
-                        musclechassis = GameObject.Instantiate(musclechassis);
-                        MuscleChassis.GetComponent<MeshFilter>().sharedMesh = musclechassis.GetComponentInChildren<MeshFilter>().sharedMesh;
-
-                        //Loads texture for chassis
-                        Texture chassistexture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
-                        MuscleChassis.GetComponent<MeshRenderer>().material.mainTexture = chassistexture;
-
-                        //Replaces chassis 1
-                        GameObject musclechassis1 = ab.LoadAsset("muscle chassis base.obj") as GameObject;
-                        musclechassis1 = GameObject.Instantiate(musclechassis1);
-                        MuscleChassis1.GetComponent<MeshFilter>().sharedMesh = musclechassis1.GetComponentInChildren<MeshFilter>().sharedMesh;
-
-                        //Loads texture for chassis 1
-                        Texture chassis1texture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
-                        MuscleChassis1.GetComponent<MeshRenderer>().material.mainTexture = chassis1texture;
-
-                        //Replaces windows(out)
-                        GameObject windowsout = ab.LoadAsset("muscle windows out.obj") as GameObject;
-                        windowsout = GameObject.Instantiate(windowsout);
-                        windowsOut.GetComponent<MeshFilter>().sharedMesh = windowsout.GetComponentInChildren<MeshFilter>().sharedMesh;
-
-                        //Replaces windows(in)
-                        GameObject windowsin = ab.LoadAsset("muscle windows in.obj") as GameObject;
-                        windowsin = GameObject.Instantiate(windowsin);
-                        windowsIn.GetComponent<MeshFilter>().sharedMesh = windowsin.GetComponentInChildren<MeshFilter>().sharedMesh;
-
-                        //Replaces interior
-                        GameObject convertibleinterior = ab.LoadAsset("muscle interior convertible.obj") as GameObject;
-                        convertibleinterior = GameObject.Instantiate(convertibleinterior);
-                        ConvertibleInterior.GetComponent<MeshFilter>().sharedMesh = convertibleinterior.GetComponentInChildren<MeshFilter>().sharedMesh;
-
-                        ab.Unload(false);
-                    }
-                }
-            }
-
-            if (FsmVariables.GlobalVariables.FindFsmString("PlayerCurrentVehicle").Value != "FERNDALE(1630kg)")
-            {
-                if (RLsusButton.IsDown())
-                {
-                    isRLactive = !isRLactive;
-                }
-
-                if (RRsusButton.IsDown())
-                {
-                    isRRactive = !isRRactive;
-                }
-
-                if (FRsusButton.IsDown())
-                {
-                    isFRactive = !isFRactive;
-                }
-
-                if (FLsusButton.IsDown())
-                {
-                    isFLactive = !isFLactive;
-                }
-
-                if (isRRactive == true)
-                {
-                    if (increase.IsDown())
-                    {
-                        Vector3 pos = wheelRR.localPosition;
-                        pos.y -= 0.1f;
-                        wheelRR.localPosition = pos;
-                    }
-                    if (decrease.IsPressed())
-                    {
-                        Vector3 pos = wheelRR.localPosition;
-                        pos.y += 0.005f;
-                        wheelRR.localPosition = pos;
-                    }
-                }
-                if (isRLactive == true)
-                {
-                    if (increase.IsDown())
-                    {
-                        Vector3 pos = wheelRL.localPosition;
-                        pos.y -= 0.1f;
-                        wheelRL.localPosition = pos;
-                    }
-                    if (decrease.IsPressed())
-                    {
-                        Vector3 pos = wheelRL.localPosition;
-                        pos.y += 0.005f;
-                        wheelRL.localPosition = pos;
-                    }
-                }
-                if (isFRactive == true)
-                {
-                    if (increase.IsDown())
-                    {
-                        Vector3 pos = wheelFR.localPosition;
-                        pos.y -= 0.25f;
-                        wheelFR.localPosition = pos;
-                    }
-                    if (decrease.IsPressed())
-                    {
-                        Vector3 pos = wheelFR.localPosition;
-                        pos.y += 0.005f;
-                        wheelFR.localPosition = pos;
-                    }
-                }
-                if (isFLactive == true)
-                {
-                    if (increase.IsDown())
-                    {
-                        Vector3 pos = wheelFL.localPosition;
-                        pos.y -= 0.25f;
-                        wheelFL.localPosition = pos;
-                    }
-                    if (decrease.IsPressed())
-                    {
-                        Vector3 pos = wheelFL.localPosition;
-                        pos.y += 0.005f;
-                        wheelFL.localPosition = pos;
-                    }
-                }
-            }
-        }
 
         public override void OnLoad()
         {
+
 
             //Keybindings
             Keybind.Add(this, FLsusButton);
@@ -230,9 +81,6 @@ namespace Ferndale_Lowrider_Edition
             Keybind.Add(this, RRsusButton);
             Keybind.Add(this, increase);
             Keybind.Add(this, decrease);
-
-
-            AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
 
 
             //transforms
@@ -268,11 +116,6 @@ namespace Ferndale_Lowrider_Edition
             TireFR = GameObject.Find("FERNDALE(1630kg)/wheelFR/Tire/Mesh 2/tire_stock");
             TireRL = GameObject.Find("FERNDALE(1630kg)/wheelRL/Tire/Mesh 1/tire_stock");
             TireRR = GameObject.Find("FERNDALE(1630kg)/wheelRR/Tire/Mesh/tire_stock");
-            MuscleChassis = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis");
-            MuscleChassis1 = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis 1");
-            windowsOut = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows");
-            windowsIn = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows_in");
-            ConvertibleInterior = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_interior");
 
 
             //Changes transform of wheels and thier childs
@@ -300,12 +143,17 @@ namespace Ferndale_Lowrider_Edition
             GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1/glass").SetActive(false);
             GameObject.Find("FERNDALE(1630kg)/DriverDoors/door(right)/door 1/glass_in").SetActive(false);
 
+            //Disables hood scoop
+            GameObject.Find("muscle_Scoop").SetActive(false);
+
 
             //Asset replacement
             //---------------------------------------------------------------------------------------------------
 
+            AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
+
             //Replaces ferndale's body
-            
+
             GameObject convertiblemesh = ab.LoadAsset("muscle body convertible.obj") as GameObject;
             convertiblemesh = GameObject.Instantiate(convertiblemesh);
             ferndale.GetComponent<MeshFilter>().sharedMesh = convertiblemesh.GetComponentInChildren<MeshFilter>().sharedMesh;
@@ -446,6 +294,159 @@ namespace Ferndale_Lowrider_Edition
 
             ab.Unload(false);
 
+        }
+
+        int stopLoad = 0;
+
+        public override void Update()
+        {
+            if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
+            {
+
+                stopLoad++;
+
+                if (stopLoad == 1)
+                {
+
+                    if (GameObject.Find("FERNDALE(1630kg)/LOD") != null)
+                    {
+
+                        //Loads custom steering wheel
+                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_custom").SetActive(true);
+                        GameObject.Find("FERNDALE(1630kg)/LOD/Dashboard/Steering/MuscleSteeringPivot/wheel_Stock").SetActive(false);
+
+
+                        //Finds all needed LOD GameObjects
+                        MuscleChassis = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis");
+                        MuscleChassis1 = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_chassis 1");
+                        windowsOut = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows");
+                        windowsIn = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_windows_in");
+                        ConvertibleInterior = GameObject.Find("FERNDALE(1630kg)/LOD/MESH/muscle_interior");
+
+
+                        //Asset replacement for LOD
+                        //---------------------------------------------------------------------------------------------------
+
+                        AssetBundle ab = LoadAssets.LoadBundle(this, "lowrider.unity3d");
+
+                        //Replaces chassis
+                        GameObject musclechassis = ab.LoadAsset("muscle chassis.obj") as GameObject;
+                        musclechassis = GameObject.Instantiate(musclechassis);
+                        MuscleChassis.GetComponent<MeshFilter>().sharedMesh = musclechassis.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Loads texture for chassis
+                        Texture chassistexture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+                        MuscleChassis.GetComponent<MeshRenderer>().material.mainTexture = chassistexture;
+
+                        //Replaces chassis 1
+                        GameObject musclechassis1 = ab.LoadAsset("muscle chassis base.obj") as GameObject;
+                        musclechassis1 = GameObject.Instantiate(musclechassis1);
+                        MuscleChassis1.GetComponent<MeshFilter>().sharedMesh = musclechassis1.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Loads texture for chassis 1
+                        Texture chassis1texture = ab.LoadAsset("Ferndale Lowrider Textures.png") as Texture;
+                        MuscleChassis1.GetComponent<MeshRenderer>().material.mainTexture = chassis1texture;
+
+                        //Replaces windows(out)
+                        GameObject windowsout = ab.LoadAsset("muscle windows out.obj") as GameObject;
+                        windowsout = GameObject.Instantiate(windowsout);
+                        windowsOut.GetComponent<MeshFilter>().sharedMesh = windowsout.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Replaces windows(in)
+                        GameObject windowsin = ab.LoadAsset("muscle windows in.obj") as GameObject;
+                        windowsin = GameObject.Instantiate(windowsin);
+                        windowsIn.GetComponent<MeshFilter>().sharedMesh = windowsin.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        //Replaces interior
+                        GameObject convertibleinterior = ab.LoadAsset("muscle interior convertible.obj") as GameObject;
+                        convertibleinterior = GameObject.Instantiate(convertibleinterior);
+                        ConvertibleInterior.GetComponent<MeshFilter>().sharedMesh = convertibleinterior.GetComponentInChildren<MeshFilter>().sharedMesh;
+
+                        ab.Unload(false);
+                    }
+                }
+            }
+
+            if (RLsusButton.IsDown())
+            {
+                isRLactive = !isRLactive;
+            }
+
+            if (RRsusButton.IsDown())
+            {
+                isRRactive = !isRRactive;
+            }
+
+            if (FRsusButton.IsDown())
+            {
+                isFRactive = !isFRactive;
+            }
+
+            if (FLsusButton.IsDown())
+            {
+                isFLactive = !isFLactive;
+            }
+
+            if (isRRactive == true)
+            {
+                if (increase.IsDown())
+                {
+                    Vector3 pos = wheelRR.localPosition;
+                    pos.y -= 0.1f;
+                    wheelRR.localPosition = pos;
+                }
+                if (decrease.IsPressed())
+                {
+                    Vector3 pos = wheelRR.localPosition;
+                    pos.y += 0.005f;
+                    wheelRR.localPosition = pos;
+                }
+            }
+            if (isRLactive == true)
+            {
+                if (increase.IsDown())
+                {
+                    Vector3 pos = wheelRL.localPosition;
+                    pos.y -= 0.1f;
+                    wheelRL.localPosition = pos;
+                }
+                if (decrease.IsPressed())
+                {
+                    Vector3 pos = wheelRL.localPosition;
+                    pos.y += 0.005f;
+                    wheelRL.localPosition = pos;
+                }
+            }
+            if (isFRactive == true)
+            {
+                if (increase.IsDown())
+                {
+                    Vector3 pos = wheelFR.localPosition;
+                    pos.y -= 0.25f;
+                    wheelFR.localPosition = pos;
+                }
+                if (decrease.IsPressed())
+                {
+                    Vector3 pos = wheelFR.localPosition;
+                    pos.y += 0.005f;
+                    wheelFR.localPosition = pos;
+                }
+            }
+            if (isFLactive == true)
+            {
+                if (increase.IsDown())
+                {
+                    Vector3 pos = wheelFL.localPosition;
+                    pos.y -= 0.25f;
+                    wheelFL.localPosition = pos;
+                }
+                if (decrease.IsPressed())
+                {
+                    Vector3 pos = wheelFL.localPosition;
+                    pos.y += 0.005f;
+                    wheelFL.localPosition = pos;
+                }
+            }
         }
     }
 }
