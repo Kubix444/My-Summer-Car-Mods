@@ -1,0 +1,131 @@
+using MSCLoader;
+using UnityEngine;
+
+namespace jonnezmirrors
+{
+    public class jonnezmirrors : Mod
+    {
+        public override string ID => "jonnezmirrors";
+        public override string Name => "Jonnez Mirrors";
+        public override string Author => "Kubix";
+        public override string Version => "1.0";
+        public override bool UseAssetsFolder => true;
+        GameObject jonnez;
+        GameObject player;
+        GameObject left_render;
+        GameObject right_render;
+        public Settings left_mirror = new Settings("lft_mrr", "Left mirror", true);
+        public Settings right_mirror = new Settings("rht_mrr", "Right mirror", true);
+        public override void ModSettings()
+        {
+            Settings.AddText(this, "NOTE: Changes will apply only after reloading save.");
+            Settings.AddCheckBox(this, left_mirror);
+            Settings.AddCheckBox(this, right_mirror);
+        }
+        public override void OnLoad()
+        {
+            AssetBundle ab = LoadAssets.LoadBundle(this, "jonnezmirrors.unity3d");
+            Mesh left_mrr = ab.LoadAsset<Mesh>("jonnez_steering_column_left_mirror");
+            Mesh right_mrr = ab.LoadAsset<Mesh>("jonnez_steering_column_right_mirror");
+            Mesh both_mrrs = ab.LoadAsset<Mesh>("jonnez_steering_column_both_mirrors");
+
+
+            jonnez = GameObject.Find("JONNEZ ES(Clone)");
+            player = GameObject.Find("PLAYER");
+            GameObject Column = jonnez.transform.Find("LOD/Suspension/Steering/SteeringPivot/Column").gameObject;
+
+            if ((bool)left_mirror.GetValue() && (bool)right_mirror.GetValue()) //Case where both mirrors are active.
+            {
+                left_render = GameObject.Instantiate(ab.LoadAsset<GameObject>("mirror_left_render.prefab"));
+                right_render = GameObject.Instantiate(ab.LoadAsset<GameObject>("mirror_right_render.prefab"));
+                Column.GetComponent<MeshFilter>().mesh = both_mrrs;
+                left_render.transform.SetParent(Column.transform);
+                left_render.transform.localPosition = Vector3.zero;
+                left_render.transform.localEulerAngles = Vector3.zero;
+                right_render.transform.SetParent(Column.transform);
+                right_render.transform.localPosition = Vector3.zero;
+                right_render.transform.localEulerAngles = Vector3.zero;
+            }
+            else if ((bool)left_mirror.GetValue()) //Case where only left mirror is active.
+            {
+                left_render = GameObject.Instantiate(ab.LoadAsset<GameObject>("mirror_left_render.prefab"));
+                Column.GetComponent<MeshFilter>().mesh = left_mrr;
+                left_render.transform.SetParent(Column.transform);
+                left_render.transform.localPosition = Vector3.zero;
+                left_render.transform.localEulerAngles = Vector3.zero;
+            }
+            else if ((bool)right_mirror.GetValue()) //Case where only right mirror is active.
+            {
+                right_render = GameObject.Instantiate(ab.LoadAsset<GameObject>("mirror_right_render.prefab"));
+                Column.GetComponent<MeshFilter>().mesh = right_mrr;
+                right_render.transform.SetParent(Column.transform);
+                right_render.transform.localPosition = Vector3.zero;
+                right_render.transform.localEulerAngles = Vector3.zero;
+            }
+            else
+            {
+                ModConsole.Error("You have installed Jonnez Mirrors mod, but none of them was choosen. " +
+                    "Go back to menu. " +
+                    "Hit CTRL + M to open up mods settings, " +
+                    "go to Jonnez Mirrors settings, " +
+                    "choose mirror/s that you want to be loaded and reload save to apply changes.");
+            }
+            ab.Unload(false);
+        }
+        //Spare distance detecton.
+        /*public override void Update()
+        {
+            float distance = Vector3.Distance(jonnez.transform.position, player.transform.position);
+            if (distance >= 3)
+            {
+                if ((bool)left_mirror.GetValue() && (bool)right_mirror.GetValue())
+                {
+                    if (left_render.activeInHierarchy && right_render.activeInHierarchy)
+                    {
+                        left_render.SetActive(false);
+                        right_render.SetActive(false);
+                    }
+                }
+                else if ((bool)left_mirror.GetValue())
+                {
+                    if (left_render.activeInHierarchy)
+                    {
+                        left_render.SetActive(false);
+                    }
+                }
+                else if ((bool)right_mirror.GetValue())
+                {
+                    if (right_render.activeInHierarchy)
+                    {
+                        right_render.SetActive(false);
+                    }
+                }
+            }
+            else
+            {
+                if ((bool)left_mirror.GetValue() && (bool)right_mirror.GetValue())
+                {
+                    if (!left_render.activeInHierarchy && !right_render.activeInHierarchy)
+                    {
+                        left_render.SetActive(true);
+                        right_render.SetActive(true);
+                    }
+                }
+                else if ((bool)left_mirror.GetValue())
+                {
+                    if (!left_render.activeInHierarchy)
+                    {
+                        left_render.SetActive(true);
+                    }
+                }
+                else if ((bool)right_mirror.GetValue())
+                {
+                    if (!right_render.activeInHierarchy)
+                    {
+                        right_render.SetActive(true);
+                    }
+                }
+            } 
+        }*/
+    }
+}
