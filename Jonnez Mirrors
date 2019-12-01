@@ -28,8 +28,6 @@ namespace jonnezmirrors
             Mesh left_mrr = ab.LoadAsset<Mesh>("jonnez_steering_column_left_mirror");
             Mesh right_mrr = ab.LoadAsset<Mesh>("jonnez_steering_column_right_mirror");
             Mesh both_mrrs = ab.LoadAsset<Mesh>("jonnez_steering_column_both_mirrors");
-
-
             jonnez = GameObject.Find("JONNEZ ES(Clone)");
             player = GameObject.Find("PLAYER");
             GameObject Column = jonnez.transform.Find("LOD/Suspension/Steering/SteeringPivot/Column").gameObject;
@@ -72,7 +70,7 @@ namespace jonnezmirrors
             }
             ab.Unload(false);
         }
-        //Spare distance detecton.
+        //Spare distance calculation.
         /*public override void Update()
         {
             float distance = Vector3.Distance(jonnez.transform.position, player.transform.position);
